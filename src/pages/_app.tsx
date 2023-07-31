@@ -6,6 +6,8 @@ import type { AppType } from "next/app";
 import { trpc } from "../utils/trpc";
 import NextNProgress from "nextjs-progressbar";
 import { ThemeProvider } from "next-themes";
+import '../styles/globals.css'; // Move the global CSS import to _app.tsx
+
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,

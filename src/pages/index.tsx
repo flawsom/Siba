@@ -8,6 +8,7 @@ import RecentBlogs from "../components/RecentBlogs";
 import { getPinnedRepos } from "../lib/repos";
 import { getBlogs } from "../lib/blogs";
 import type { Blog, Repo } from "../lib/types";
+import MouseTrail from "./MouseTrail";
 
 const Home = (props: { latestPosts: Blog[]; pinnedRepos: Repo[] }) => {
   return (
@@ -39,6 +40,7 @@ const Home = (props: { latestPosts: Blog[]; pinnedRepos: Repo[] }) => {
         </section>
         <RecentBlogs recentBlogs={props.latestPosts} />
         <PinnedRepos pinnedRepos={props.pinnedRepos} />
+        <MouseTrail />
         <Footer />
       </div>
     </Layout>
