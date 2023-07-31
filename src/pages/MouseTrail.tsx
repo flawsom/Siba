@@ -3,21 +3,16 @@ import React, { useRef, useEffect } from 'react';
 const LINE_DURATION = 2;
 const LINE_WIDTH_START = 5;
 
-interface Point {
-  x: number;
-  y: number;
-  lifetime: number;
-  flip: boolean;
-}
-
-const MouseTrail: React.FC = React.memo(() => {
+const MouseTrail: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const points: Point[] = [];
+  const points: { x: number; y: number; lifetime: number; flip: boolean }[] = [];
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!ctx || !canvas) return;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
     // Set canvas size to match the window
     canvas.width = window.innerWidth;
@@ -28,7 +23,7 @@ const MouseTrail: React.FC = React.memo(() => {
     let spread = 2;
     let mode = 1;
     let pathMode = 1;
-    let drawEveryFrame = 1; // Only adds a Point after these many 'mousemove' or 'touchmove' events
+    let drawEveryFrame = 1; // Only adds a Point after these many 'mousemove' events
 
     let clickCount = 0;
     let frame = 0;
@@ -38,8 +33,7 @@ const MouseTrail: React.FC = React.memo(() => {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
-      let point: Point | undefined;
-      let lastPoint: Point;
+      let point, lastPoint;
 
       if (pathMode === 2) {
         ctx.beginPath();
@@ -68,11 +62,10 @@ const MouseTrail: React.FC = React.memo(() => {
         let spreadRate;
         if (spread === 1) {
           spreadRate = lineWidthStart / (point.lifetime * 2);
-        } else if (spread === 2) {
+        } // Lerp Decrease
+        if (spread === 2) {
           spreadRate = lineWidthStart * (1 - inc);
-        } else {
-          spreadRate = 0;
-        }
+        } // Linear Decrease
 
         const fadeRate = dec;
 
@@ -90,7 +83,9 @@ const MouseTrail: React.FC = React.memo(() => {
 
         if (mode === 1) {
           ctx.arc(midpoint.x, midpoint.y, distance / 2, angle, angle + Math.PI, point.flip);
-        } else if (mode === 2) {
+        }
+
+        if (mode === 2) {
           ctx.moveTo(lastPoint.x, lastPoint.y);
           ctx.lineTo(point.x, point.y);
         }
@@ -109,36 +104,29 @@ const MouseTrail: React.FC = React.memo(() => {
 
     function addPoint(x: number, y: number) {
       flipNext = !flipNext;
-      const point: Point = { x, y, lifetime: 0, flip: flipNext };
+      const point = new Point(x, y, 0, flipNext);
       points.push(point);
     }
 
     function resizeCanvas(w: number, h: number) {
-      canvas.width = w;
-      canvas.height = h;
+      if (ctx !== undefined) {
+        ctx.canvas.width = w;
+        ctx.canvas.height = h;
+      }
     }
 
-    // Mouse and Touch Listeners
+    // Mouse Listeners
     function enableListeners() {
-      const handler = (e: MouseEvent | TouchEvent) => {
+      document.addEventListener('mousemove', (e) => {
         if (frame === drawEveryFrame) {
           const rect = canvas.getBoundingClientRect();
-          let x, y;
-          if (e instanceof MouseEvent) {
-            x = e.clientX - rect.left;
-            y = e.clientY - rect.top;
-          } else if (e instanceof TouchEvent && e.touches.length) {
-            x = e.touches[0].clientX - rect.left;
-            y = e.touches[0].clientY - rect.top;
-          }
+          const x = e.clientX - rect.left; // Adjust the x position based on the canvas position
+          const y = e.clientY - rect.top; // Adjust the y position based on the canvas position
           addPoint(x, y);
           frame = 0;
         }
         frame++;
-      };
-      
-      document.addEventListener('mousemove', handler);
-      document.addEventListener('touchmove', handler);
+      });
     }
 
     // RequestAnimFrame definition
@@ -163,8 +151,12 @@ const MouseTrail: React.FC = React.memo(() => {
       requestAnimationFrame(draw);
     }
 
+    function init() {
+      draw();
+    }
+
     function enableDrawingCanvas() {
-      if (!canvas) {
+      if (canvas === undefined) {
         const newCanvas = document.createElement('canvas');
         newCanvas.setAttribute('id', 'myCanvas');
         newCanvas.style.position = 'fixed';
@@ -186,7 +178,7 @@ const MouseTrail: React.FC = React.memo(() => {
       style={{ position: 'fixed', top: 0, left: 0, pointerEvents: 'none', zIndex: 9999 }}
     />
   );
-});
+};
 
 export default MouseTrail;
 
