@@ -20,9 +20,9 @@ const MouseTrail: React.FC = () => {
 
     const lineDuration = LINE_DURATION;
     const lineWidthStart = LINE_WIDTH_START;
-    const spread: number = 2;
-    const mode: number = 1;
-    const pathMode: number | string = 1;
+    const spread = 2;
+    const mode = 1;
+    const pathMode = 1;
     const drawEveryFrame = 1;
 
     let frame = 0;
@@ -173,7 +173,7 @@ const MouseTrail: React.FC = () => {
 
     enableDrawingCanvas();
     resizeCanvas(window.innerWidth, window.innerHeight);
-  }, []);
+  }, [points]); // Add 'points' to the dependency array
 
   return (
     <canvas
