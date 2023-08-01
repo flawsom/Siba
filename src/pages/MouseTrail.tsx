@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 
 enum PathMode {
-  MODE_1 = 1,
-  MODE_2 = 2,
+  MODE_1 = 'MODE_1',
+  MODE_2 = 'MODE_2',
 }
 
 enum Spread {
@@ -162,14 +162,14 @@ const MouseTrail: React.FC = () => {
         newCanvas.style.top = '0';
         newCanvas.style.left = '0';
         newCanvas.style.pointerEvents = 'none';
-        newCanvas.style.zIndex = '9999';
+        newCanvas.style.zIndex = '9999'; /* Ensure it's above other elements on the page */
         document.body.appendChild(newCanvas);
       }
     }
 
     enableDrawingCanvas();
     resizeCanvas(window.innerWidth, window.innerHeight);
-  }, []); // <-- Add 'points' to the dependency array to remove the warning
+  }, []);
 
   return (
     <canvas
