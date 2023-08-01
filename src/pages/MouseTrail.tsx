@@ -33,7 +33,7 @@ const MouseTrail: React.FC = () => {
     let frame = 0;
     let flipNext = true;
 
-    function animatePoints() {
+    function animatePoints(ctx: CanvasRenderingContext2D) {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
@@ -151,7 +151,9 @@ const MouseTrail: React.FC = () => {
     draw();
 
     function draw() {
-      animatePoints();
+      if (ctx) {
+        animatePoints(ctx);
+      }
       requestAnimationFrame(draw);
     }
 
