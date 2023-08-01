@@ -46,8 +46,8 @@ const MouseTrail: React.FC = () => {
     let lastPoint: Point | undefined = undefined; // Initialize lastPoint as undefined
 
     function animatePoints() {
-      // Add a check to ensure ctx is not null before using it
-      if (!ctx) return;
+      // Add a check to ensure ctx and canvas are not null before using them
+      if (!ctx || !canvas) return;
 
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -140,6 +140,9 @@ const MouseTrail: React.FC = () => {
     // Mouse Listeners
     function enableListeners() {
       document.addEventListener('mousemove', (e) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return; // Return early if canvas is null
+
         if (frame === DRAW_EVERY_FRAME) {
           const rect = canvas.getBoundingClientRect();
           const x = e.clientX - rect.left;
