@@ -41,7 +41,6 @@ const MouseTrail: React.FC = () => {
     const mode = Mode.MODE_1;
     const pathMode: PathMode = PathMode.MODE_1;
 
-    let clickCount = 0;
     let frame = 0;
     let flipNext = true;
     let lastPoint: Point | undefined = undefined; // Initialize lastPoint as undefined
@@ -153,14 +152,14 @@ const MouseTrail: React.FC = () => {
     }
 
     // RequestAnimFrame definition
-    (window as any).requestAnimFrame = (function(callback: any) {
+    (window as any).requestAnimFrame = (function(callback: (timestamp: number) => void) {
       return (
         window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         window.oRequestAnimationFrame ||
         window.msRequestAnimationFrame ||
-        function(callback: any) {
+        function(callback: (timestamp: number) => void) {
           window.setTimeout(callback, 1000 / 60);
         }
       );
