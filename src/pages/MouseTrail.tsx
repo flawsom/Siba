@@ -1,5 +1,15 @@
 import React, { useRef, useEffect } from 'react';
 
+enum PathMode {
+  MODE_1 = 1,
+  MODE_2 = 2,
+}
+
+enum Spread {
+  LERP_DECREASE = 1,
+  LINEAR_DECREASE = 2,
+}
+
 const LINE_DURATION = 2;
 const LINE_WIDTH_START = 5;
 
@@ -18,12 +28,12 @@ const MouseTrail: React.FC = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const lineDuration = LINE_DURATION;
-    const lineWidthStart = LINE_WIDTH_START;
-    const spread = 2;
-    const mode = 1;
-    const pathMode = 1;
-    const drawEveryFrame = 1;
+    let lineDuration = LINE_DURATION;
+    let lineWidthStart = LINE_WIDTH_START;
+    let spread = Spread.LINEAR_DECREASE;
+    let mode = 1;
+    let pathMode = PathMode.MODE_1;
+    let drawEveryFrame = 1;
 
     let frame = 0;
     let flipNext = true;
@@ -39,7 +49,7 @@ const MouseTrail: React.FC = () => {
 
       const duration = lineDuration * 1000 / 60;
 
-      if (pathMode === 2) {
+      if (pathMode === PathMode.MODE_2) {
         ctx.beginPath();
       }
 
@@ -62,10 +72,10 @@ const MouseTrail: React.FC = () => {
 
         let spreadRate = 0;
 
-        if (spread === 1) {
+        if (spread === Spread.LERP_DECREASE) {
           spreadRate = lineWidthStart / (point.lifetime * 2);
         } // Lerp Decrease
-        if (spread === 2) {
+        if (spread === Spread.LINEAR_DECREASE) {
           spreadRate = lineWidthStart * (1 - inc);
         } // Linear Decrease
 
@@ -77,7 +87,7 @@ const MouseTrail: React.FC = () => {
         const midpoint = Point.midPoint(lastPoint, point);
         const angle = Point.angle(lastPoint, point);
 
-        if (pathMode === 1) {
+        if (pathMode === PathMode.MODE_1) {
           ctx.beginPath();
         }
 
@@ -90,13 +100,13 @@ const MouseTrail: React.FC = () => {
           ctx.lineTo(point.x, point.y);
         }
 
-        if (pathMode === 1) {
+        if (pathMode === PathMode.MODE_1) {
           ctx.stroke();
           ctx.closePath();
         }
       }
 
-      if (pathMode === 2) {
+      if (pathMode === PathMode.MODE_2) {
         ctx.stroke();
         ctx.closePath();
       }
