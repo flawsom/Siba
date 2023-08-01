@@ -30,9 +30,13 @@ const MouseTrail: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Set canvas size to match the window
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
     const lineDuration = LINE_DURATION;
     const lineWidthStart = LINE_WIDTH_START;
-    const spread = SpreadMode.LerpIncrease;
+    const spread = SpreadMode.LerpDecrease;
     const mode = Mode.MODE_1;
     const pathMode = PathMode.MODE_1;
     const drawEveryFrame = 1; // Only adds a Point after these many 'mousemove' events
@@ -42,7 +46,6 @@ const MouseTrail: React.FC = () => {
     let flipNext = true;
 
     function animatePoints() {
-      if (!ctx) return;
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
@@ -73,7 +76,6 @@ const MouseTrail: React.FC = () => {
         const dec = 1 - inc;
 
         let spreadRate = 0;
-
         if (spread === SpreadMode.LerpIncrease) {
           spreadRate = lineWidthStart / (point.lifetime * 2);
         } else if (spread === SpreadMode.LerpDecrease) {
@@ -81,8 +83,6 @@ const MouseTrail: React.FC = () => {
         } else if (spread === SpreadMode.LinearDecrease) {
           spreadRate = lineWidthStart;
         }
-
-        const fadeRate = dec;
 
         ctx.lineJoin = "round";
         ctx.lineWidth = spreadRate;
@@ -122,9 +122,10 @@ const MouseTrail: React.FC = () => {
     }
 
     function resizeCanvas(w: number, h: number) {
-      if (!ctx) return;
-      ctx.canvas.width = w;
-      ctx.canvas.height = h;
+      if (ctx !== undefined) {
+        ctx.canvas.width = w;
+        ctx.canvas.height = h;
+      }
     }
 
     // Mouse Listeners
@@ -142,41 +143,32 @@ const MouseTrail: React.FC = () => {
     }
 
     // RequestAnimFrame definition
-    window.requestAnimFrame = (callback: any) => {
+    (window as any).requestAnimFrame = (function (callback: any) {
       return (
         window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         window.oRequestAnimationFrame ||
         window.msRequestAnimationFrame ||
-        function (callback) {
+        function (callback: any) {
           window.setTimeout(callback, 1000 / 60);
         }
       );
-    };
+    })();
+
+    function animate() {
+      animatePoints();
+      requestAnimFrame(animate);
+    }
 
     enableListeners();
-    draw();
+    animate();
+    resizeCanvas(window.innerWidth, window.innerHeight);
 
-    function draw() {
-      animatePoints();
-      requestAnimationFrame(draw);
-    }
-
-    function enableDrawingCanvas() {
-      if (canvas === undefined) {
-        const c: any = document.getElementById('canvas');
-        canvas = c;
-      }
-
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-
-    enableDrawingCanvas();
-    window.addEventListener('resize', () => {
-      enableDrawingCanvas();
-    });
+    // Cleanup function
+    return () => {
+      document.removeEventListener('mousemove', () => {});
+    };
   }, []);
 
   return (
@@ -188,9 +180,6 @@ const MouseTrail: React.FC = () => {
   );
 };
 
-
-
-// Point Class
 class Point {
   x: number;
   y: number;
@@ -204,25 +193,18 @@ class Point {
     this.flip = flip;
   }
 
-  static distance(a: Point, b: Point) {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
+  static midPoint(p1: Point, p2: Point) {
+    return new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, 0, false);
+  }
 
+  static distance(p1: Point, p2: Point) {
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  static midPoint(a: Point, b: Point) {
-    const mx = a.x + (b.x - a.x) * 0.5;
-    const my = a.y + (b.y - a.y) * 0.5;
-
-    return new Point(mx, my, 0, false);
-  }
-
-  static angle(a: Point, b: Point) {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-
-    return Math.atan2(dy, dx);
+  static angle(p1: Point, p2: Point) {
+    return Math.atan2(p2.y - p1.y, p2.x - p1.x);
   }
 }
 
