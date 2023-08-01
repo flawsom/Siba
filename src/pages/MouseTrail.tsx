@@ -46,6 +46,7 @@ const MouseTrail: React.FC = () => {
     let flipNext = true;
 
     function animatePoints() {
+      if (!ctx) return;
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
