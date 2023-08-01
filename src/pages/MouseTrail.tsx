@@ -130,10 +130,10 @@ const MouseTrail: React.FC = () => {
     }
 
     function resizeCanvas(w: number, h: number) {
-      // Add a check to ensure ctx is not null/undefined before accessing its canvas property
-      if (ctx?.canvas) {
-        ctx.canvas.width = w;
-        ctx.canvas.height = h;
+      // Add a check to ensure ctx and canvas are not null/undefined before accessing canvas property
+      if (ctx && canvas) {
+        canvas.width = w;
+        canvas.height = h;
       }
     }
 
@@ -141,6 +141,9 @@ const MouseTrail: React.FC = () => {
     function enableListeners() {
       document.addEventListener('mousemove', (e) => {
         if (frame === DRAW_EVERY_FRAME) {
+          const canvas = canvasRef.current; // Get the canvas element from the ref
+          if (!canvas) return; // Add a check to ensure canvas is not null/undefined
+
           const rect = canvas.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
