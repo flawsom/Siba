@@ -21,9 +21,9 @@ const MouseTrail: React.FC = () => {
     const lineDuration = LINE_DURATION;
     const lineWidthStart = LINE_WIDTH_START;
     const spread: number = 2;
-    const mode: number = 1; // Updated to explicitly define as number
-    const pathMode: number | string = 1; // Updated to allow number or string values
-    const drawEveryFrame = 1; // Only adds a Point after these many 'mousemove' events
+    const mode: number = 1;
+    const pathMode: number | string = 1;
+    const drawEveryFrame = 1;
 
     let frame = 0;
     let flipNext = true;
@@ -57,7 +57,7 @@ const MouseTrail: React.FC = () => {
         }
 
         // Begin drawing stuff!
-        const inc = point.lifetime / duration; // 0 to 1 over lineDuration
+        const inc = point.lifetime / duration;
         const dec = 1 - inc;
 
         let spreadRate = 0;
@@ -109,10 +109,14 @@ const MouseTrail: React.FC = () => {
     }
 
     function resizeCanvas(w: number, h: number) {
-      if (ctx !== undefined) {
-        ctx.canvas.width = w;
-        ctx.canvas.height = h;
-      }
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      ctx.canvas.width = w;
+      ctx.canvas.height = h;
     }
 
     // Mouse Listeners
@@ -120,8 +124,8 @@ const MouseTrail: React.FC = () => {
       document.addEventListener('mousemove', (e) => {
         if (frame === drawEveryFrame) {
           const rect = canvas.getBoundingClientRect();
-          const x = e.clientX - rect.left; // Adjust the x position based on the canvas position
-          const y = e.clientY - rect.top; // Adjust the y position based on the canvas position
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
           addPoint(x, y);
           frame = 0;
         }
@@ -159,14 +163,14 @@ const MouseTrail: React.FC = () => {
         newCanvas.style.top = '0';
         newCanvas.style.left = '0';
         newCanvas.style.pointerEvents = 'none';
-        newCanvas.style.zIndex = '9999'; /* Ensure it's above other elements on the page */
+        newCanvas.style.zIndex = '9999';
         document.body.appendChild(newCanvas);
       }
     }
 
     enableDrawingCanvas();
     resizeCanvas(window.innerWidth, window.innerHeight);
-  }, []); // Empty dependency array since 'points' doesn't need to trigger the effect
+  }, []);
 
   return (
     <canvas
