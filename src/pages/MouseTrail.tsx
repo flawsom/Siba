@@ -39,20 +39,16 @@ const MouseTrail: React.FC = () => {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
-      let point, lastPoint;
 
       if (pathMode === 2) {
         ctx.beginPath();
       }
 
       for (let i = 0; i < points.length; i++) {
-        point = points[i];
+        const point = points[i];
+        if (!point) continue;
 
-        if (points[i - 1] !== undefined) {
-          lastPoint = points[i - 1];
-        } else {
-          lastPoint = points[i];
-        }
+        const lastPoint = points[i - 1] || point;
 
         point.lifetime += 1;
 
