@@ -121,6 +121,9 @@ const MouseTrail: React.FC = () => {
 
     // Mouse Listeners
     function enableListeners() {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
       document.addEventListener('mousemove', (e) => {
         if (frame === drawEveryFrame) {
           const rect = canvas.getBoundingClientRect();
