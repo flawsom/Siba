@@ -46,7 +46,6 @@ const MouseTrail: React.FC = () => {
     let flipNext = true;
 
     function animatePoints() {
-      if (!ctx) return;
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
@@ -129,10 +128,8 @@ const MouseTrail: React.FC = () => {
     }
 
     function resizeCanvas(w: number, h: number) {
-      if (ctx !== undefined) {
-        ctx.canvas.width = w;
-        ctx.canvas.height = h;
-      }
+      ctx.canvas.width = w;
+      ctx.canvas.height = h;
     }
 
     // Mouse Listeners
@@ -169,10 +166,6 @@ const MouseTrail: React.FC = () => {
     function draw() {
       animatePoints();
       requestAnimationFrame(draw);
-    }
-
-    function init() {
-      draw();
     }
 
     function enableDrawingCanvas() {
