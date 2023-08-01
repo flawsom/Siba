@@ -130,7 +130,8 @@ const MouseTrail: React.FC = () => {
     }
 
     function resizeCanvas(w: number, h: number) {
-      if (ctx !== undefined) {
+      // Add a check to ensure ctx is not null/undefined before accessing its canvas property
+      if (ctx?.canvas) {
         ctx.canvas.width = w;
         ctx.canvas.height = h;
       }
