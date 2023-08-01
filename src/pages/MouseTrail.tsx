@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 enum PathMode {
   MODE_1 = 'MODE_1',
@@ -23,6 +23,7 @@ const DRAW_EVERY_FRAME = 1;
 const MouseTrail: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const points: { x: number; y: number; lifetime: number; flip: boolean }[] = [];
+  const [lastPoint, setLastPoint] = useState<Point | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -43,7 +44,6 @@ const MouseTrail: React.FC = () => {
 
     let frame = 0;
     let flipNext = true;
-    let lastPoint: Point | null = null;
 
     function animatePoints() {
       if (!ctx) return;
@@ -61,7 +61,7 @@ const MouseTrail: React.FC = () => {
         point = points[i];
 
         if (!lastPoint) {
-          lastPoint = point;
+          setLastPoint(point);
         }
 
         if (!point) {
@@ -113,7 +113,7 @@ const MouseTrail: React.FC = () => {
         }
 
         // Update lastPoint for the next iteration
-        lastPoint = point;
+        setLastPoint(point);
       }
 
       if (pathMode === PathMode.MODE_2) {
