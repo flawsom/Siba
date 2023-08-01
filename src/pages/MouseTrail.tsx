@@ -35,14 +35,16 @@ const MouseTrail: React.FC = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const lineDuration: number = LINE_DURATION;
-    const lineWidthStart: number = LINE_WIDTH_START;
+    const lineDuration = LINE_DURATION;
+    const lineWidthStart = LINE_WIDTH_START;
     const spread: SpreadMode = SpreadMode.LerpDecrease; // Explicitly set the type and initial value
-    const mode: Mode = Mode.MODE_1;
+    const mode = Mode.MODE_1;
     const pathMode: PathMode = PathMode.MODE_1;
 
+    let clickCount = 0;
     let frame = 0;
     let flipNext = true;
+    let lastPoint: Point | undefined = undefined; // Initialize lastPoint as undefined
 
     function animatePoints() {
       // Add a check to ensure ctx is not null before using it
@@ -51,7 +53,7 @@ const MouseTrail: React.FC = () => {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
-      let point, lastPoint;
+      let point;
 
       if (pathMode === PathMode.MODE_2) {
         ctx.beginPath();
@@ -60,10 +62,8 @@ const MouseTrail: React.FC = () => {
       for (let i = 0; i < points.length; i++) {
         point = points[i];
 
-        let lastPoint = points[i - 1]; // Remove the default assignment
-
-        if (i === 0) {
-          // Special handling for the first point
+        // Assign lastPoint with a default value if it is undefined
+        if (lastPoint === undefined) {
           lastPoint = point;
         }
 
@@ -114,6 +114,9 @@ const MouseTrail: React.FC = () => {
           ctx.stroke();
           ctx.closePath();
         }
+
+        // Update lastPoint for the next iteration
+        lastPoint = point;
       }
 
       if (pathMode === PathMode.MODE_2) {
@@ -121,7 +124,6 @@ const MouseTrail: React.FC = () => {
         ctx.closePath();
       }
     }
-
 
     function addPoint(x: number, y: number) {
       flipNext = !flipNext;
@@ -175,9 +177,9 @@ const MouseTrail: React.FC = () => {
 
     // Cleanup function
     return () => {
-      document.removeEventListener('mousemove', () => {});
+      document.removeEventListener('mousemove', () => { });
     };
-  }, [points]);
+  }, []);
 
   return (
     <canvas
