@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 
 enum PathMode {
-  MODE_1,
-  MODE_2,
+  MODE_1 = 'MODE_1',
+  MODE_2 = 'MODE_2',
 }
 
 enum Mode {
@@ -44,12 +44,12 @@ const MouseTrail: React.FC = () => {
     let clickCount = 0;
     let frame = 0;
     let flipNext = true;
-    let point, lastPoint;
 
-    function animatePoints(ctx: CanvasRenderingContext2D) {
+    function animatePoints() {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
+      let point, lastPoint;
 
       if (pathMode === PathMode.MODE_2) {
         ctx.beginPath();
@@ -71,18 +71,22 @@ const MouseTrail: React.FC = () => {
           continue;
         }
 
-        const inc = point.lifetime / duration;
+        // Begin drawing stuff!
+        const inc = point.lifetime / duration; // 0 to 1 over lineDuration
         const dec = 1 - inc;
 
         let spreadRate = 0;
-
         if (spread === SpreadMode.LerpIncrease) {
           spreadRate = lineWidthStart / (point.lifetime * 2);
-        } else if (spread === SpreadMode.LerpDecrease) {
+        } // Lerp Increase
+        if (spread === SpreadMode.LerpDecrease) {
           spreadRate = lineWidthStart * (1 - inc);
-        } else if (spread === SpreadMode.LinearDecrease) {
-          spreadRate = lineWidthStart / (point.lifetime * 2);
-        }
+        } // Lerp Decrease
+        if (spread === SpreadMode.LinearDecrease) {
+          spreadRate = lineWidthStart;
+        } // Linear Decrease
+
+        const fadeRate = dec;
 
         ctx.lineJoin = "round";
         ctx.lineWidth = spreadRate;
@@ -162,7 +166,7 @@ const MouseTrail: React.FC = () => {
     draw();
 
     function draw() {
-      animatePoints(ctx);
+      animatePoints();
       requestAnimationFrame(draw);
     }
 
@@ -195,8 +199,7 @@ const MouseTrail: React.FC = () => {
   );
 };
 
-export default MouseTrail;
-
+// Point Class
 class Point {
   x: number;
   y: number;
@@ -231,3 +234,5 @@ class Point {
     return Math.atan2(dy, dx);
   }
 }
+
+export default MouseTrail;
