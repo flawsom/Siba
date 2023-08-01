@@ -35,13 +35,12 @@ const MouseTrail: React.FC = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const lineDuration = LINE_DURATION;
-    const lineWidthStart = LINE_WIDTH_START;
+    const lineDuration: number = LINE_DURATION;
+    const lineWidthStart: number = LINE_WIDTH_START;
     const spread: SpreadMode = SpreadMode.LerpDecrease; // Explicitly set the type and initial value
-    const mode = Mode.MODE_1;
+    const mode: Mode = Mode.MODE_1;
     const pathMode: PathMode = PathMode.MODE_1;
 
-    let clickCount = 0;
     let frame = 0;
     let flipNext = true;
 
@@ -138,10 +137,10 @@ const MouseTrail: React.FC = () => {
     // Mouse Listeners
     function enableListeners() {
       document.addEventListener('mousemove', (e) => {
-        if (frame === DRAW_EVERY_FRAME) { // Use DRAW_EVERY_FRAME constant instead of drawEveryFrame
+        if (frame === DRAW_EVERY_FRAME) {
           const rect = canvas.getBoundingClientRect();
-          const x = e.clientX - rect.left; // Adjust the x position based on the canvas position
-          const y = e.clientY - rect.top; // Adjust the y position based on the canvas position
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
           addPoint(x, y);
           frame = 0;
         }
@@ -176,7 +175,7 @@ const MouseTrail: React.FC = () => {
     return () => {
       document.removeEventListener('mousemove', () => {});
     };
-  }, []);
+  }, [points]);
 
   return (
     <canvas
