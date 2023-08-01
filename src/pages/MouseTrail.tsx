@@ -20,8 +20,8 @@ const MouseTrail: React.FC = () => {
 
     const lineDuration = LINE_DURATION;
     const lineWidthStart = LINE_WIDTH_START;
-    const spread: number = 2; // Updated to explicitly define as number
-    const mode = 1;
+    const spread: number = 2;
+    const mode: number = 1; // Updated to explicitly define as number
     const pathMode: number | string = 1; // Updated to allow number or string values
     const drawEveryFrame = 1; // Only adds a Point after these many 'mousemove' events
 
