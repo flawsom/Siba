@@ -60,11 +60,7 @@ const MouseTrail: React.FC = () => {
       for (let i = 0; i < points.length; i++) {
         point = points[i];
 
-        if (points[i - 1] !== undefined) {
-          lastPoint = points[i - 1];
-        } else {
-          lastPoint = points[i];
-        }
+        let lastPoint = points[i - 1] || point; // Provide a default value for lastPoint
 
         if (point === undefined) {
           continue;
@@ -120,6 +116,7 @@ const MouseTrail: React.FC = () => {
         ctx.closePath();
       }
     }
+
 
     function addPoint(x: number, y: number) {
       flipNext = !flipNext;
