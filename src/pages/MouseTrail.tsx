@@ -42,6 +42,7 @@ const MouseTrail: React.FC = () => {
     let flipNext = true;
 
     function animatePoints() {
+      if (!ctx) return;
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
@@ -121,6 +122,7 @@ const MouseTrail: React.FC = () => {
     }
 
     function resizeCanvas(w: number, h: number) {
+      if (!ctx) return;
       ctx.canvas.width = w;
       ctx.canvas.height = h;
     }
@@ -179,11 +181,13 @@ const MouseTrail: React.FC = () => {
 
   return (
     <canvas
+      id="canvas"
       ref={canvasRef}
       style={{ position: 'fixed', top: 0, left: 0, pointerEvents: 'none', zIndex: 9999 }}
     />
   );
 };
+
 
 
 // Point Class
