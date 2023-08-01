@@ -46,6 +46,9 @@ const MouseTrail: React.FC = () => {
     let flipNext = true;
 
     function animatePoints() {
+      // Add a check to ensure ctx is not null before using it
+      if (!ctx) return;
+
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
@@ -167,7 +170,7 @@ const MouseTrail: React.FC = () => {
 
     // Cleanup function
     return () => {
-      document.removeEventListener('mousemove', () => {});
+      document.removeEventListener('mousemove', () => { });
     };
   }, []);
 
