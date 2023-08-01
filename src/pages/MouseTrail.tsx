@@ -11,9 +11,9 @@ enum Mode {
 }
 
 enum SpreadMode {
-  LerpIncrease,
-  LerpDecrease,
-  LinearDecrease,
+  LerpIncrease = 'LerpIncrease',
+  LerpDecrease = 'LerpDecrease',
+  LinearDecrease = 'LinearDecrease',
 }
 
 const LINE_DURATION = 2;
@@ -37,7 +37,7 @@ const MouseTrail: React.FC = () => {
 
     const lineDuration = LINE_DURATION;
     const lineWidthStart = LINE_WIDTH_START;
-    const spread = SpreadMode.LerpDecrease;
+    const spread: SpreadMode = SpreadMode.LerpDecrease; // Explicitly set the type and initial value
     const mode = Mode.MODE_1;
     const pathMode: PathMode = PathMode.MODE_1;
 
