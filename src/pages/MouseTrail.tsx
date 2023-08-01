@@ -47,8 +47,8 @@ const MouseTrail: React.FC = () => {
     let lastPoint: Point | undefined = undefined; // Initialize lastPoint as undefined
 
     function animatePoints() {
-      // Add a check to ensure ctx is not null before using it
-      if (!ctx) return;
+      // Add a check to ensure ctx and lastPoint are not null/undefined before using them
+      if (!ctx || lastPoint === undefined) return;
 
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -61,11 +61,6 @@ const MouseTrail: React.FC = () => {
 
       for (let i = 0; i < points.length; i++) {
         point = points[i];
-
-        // Assign lastPoint with a default value if it is undefined
-        if (lastPoint === undefined) {
-          lastPoint = point;
-        }
 
         if (point === undefined) {
           continue;
@@ -95,24 +90,27 @@ const MouseTrail: React.FC = () => {
         ctx.lineWidth = spreadRate;
         ctx.strokeStyle = `rgb(${Math.floor(255)}, ${Math.floor(200 - 255 * dec)}, ${Math.floor(200 - 255 * inc)})`;
 
-        const distance = Point.distance(lastPoint, point);
-        const midpoint = Point.midPoint(lastPoint, point);
-        const angle = Point.angle(lastPoint, point);
+        // Add a check here to ensure lastPoint is not undefined before using it
+        if (lastPoint !== undefined) {
+          const distance = Point.distance(lastPoint, point);
+          const midpoint = Point.midPoint(lastPoint, point);
+          const angle = Point.angle(lastPoint, point);
 
-        if (pathMode === PathMode.MODE_1) {
-          ctx.beginPath();
-        }
+          if (pathMode === PathMode.MODE_1) {
+            ctx.beginPath();
+          }
 
-        if (mode === Mode.MODE_1) {
-          ctx.arc(midpoint.x, midpoint.y, distance / 2, angle, angle + Math.PI, point.flip);
-        } else if (mode === Mode.MODE_2) {
-          ctx.moveTo(lastPoint.x, lastPoint.y);
-          ctx.lineTo(point.x, point.y);
-        }
+          if (mode === Mode.MODE_1) {
+            ctx.arc(midpoint.x, midpoint.y, distance / 2, angle, angle + Math.PI, point.flip);
+          } else if (mode === Mode.MODE_2) {
+            ctx.moveTo(lastPoint.x, lastPoint.y);
+            ctx.lineTo(point.x, point.y);
+          }
 
-        if (pathMode === PathMode.MODE_1) {
-          ctx.stroke();
-          ctx.closePath();
+          if (pathMode === PathMode.MODE_1) {
+            ctx.stroke();
+            ctx.closePath();
+          }
         }
 
         // Update lastPoint for the next iteration
