@@ -30,10 +30,6 @@ const MouseTrail: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size to match the window
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
     const lineDuration = LINE_DURATION;
     const lineWidthStart = LINE_WIDTH_START;
     const spread = SpreadMode.LerpIncrease;
@@ -76,15 +72,14 @@ const MouseTrail: React.FC = () => {
         const dec = 1 - inc;
 
         let spreadRate = 0;
+
         if (spread === SpreadMode.LerpIncrease) {
           spreadRate = lineWidthStart / (point.lifetime * 2);
-        } // Lerp Increase
-        if (spread === SpreadMode.LerpDecrease) {
+        } else if (spread === SpreadMode.LerpDecrease) {
           spreadRate = lineWidthStart * (1 - inc);
-        } // Lerp Decrease
-        if (spread === SpreadMode.LinearDecrease) {
+        } else if (spread === SpreadMode.LinearDecrease) {
           spreadRate = lineWidthStart;
-        } // Linear Decrease
+        }
 
         const fadeRate = dec;
 
@@ -102,9 +97,7 @@ const MouseTrail: React.FC = () => {
 
         if (mode === Mode.MODE_1) {
           ctx.arc(midpoint.x, midpoint.y, distance / 2, angle, angle + Math.PI, point.flip);
-        }
-
-        if (mode === Mode.MODE_2) {
+        } else if (mode === Mode.MODE_2) {
           ctx.moveTo(lastPoint.x, lastPoint.y);
           ctx.lineTo(point.x, point.y);
         }
@@ -137,8 +130,8 @@ const MouseTrail: React.FC = () => {
       document.addEventListener('mousemove', (e) => {
         if (frame === drawEveryFrame) {
           const rect = canvas.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
+          const x = e.clientX - rect.left; // Adjust the x position based on the canvas position
+          const y = e.clientY - rect.top; // Adjust the y position based on the canvas position
           addPoint(x, y);
           frame = 0;
         }
@@ -147,7 +140,7 @@ const MouseTrail: React.FC = () => {
     }
 
     // RequestAnimFrame definition
-    window.requestAnimFrame = (function (callback) {
+    window.requestAnimFrame = (callback: any) => {
       return (
         window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
@@ -158,7 +151,7 @@ const MouseTrail: React.FC = () => {
           window.setTimeout(callback, 1000 / 60);
         }
       );
-    })();
+    };
 
     enableListeners();
     draw();
@@ -170,19 +163,18 @@ const MouseTrail: React.FC = () => {
 
     function enableDrawingCanvas() {
       if (canvas === undefined) {
-        const newCanvas = document.createElement('canvas');
-        newCanvas.setAttribute('id', 'myCanvas');
-        newCanvas.style.position = 'fixed';
-        newCanvas.style.top = '0';
-        newCanvas.style.left = '0';
-        newCanvas.style.pointerEvents = 'none';
-        newCanvas.style.zIndex = '9999'; /* Ensure it's above other elements on the page */
-        document.body.appendChild(newCanvas);
+        const c: any = document.getElementById('canvas');
+        canvas = c;
       }
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     }
 
     enableDrawingCanvas();
-    resizeCanvas(window.innerWidth, window.innerHeight);
+    window.addEventListener('resize', () => {
+      enableDrawingCanvas();
+    });
   }, []);
 
   return (
@@ -192,6 +184,7 @@ const MouseTrail: React.FC = () => {
     />
   );
 };
+
 
 // Point Class
 class Point {
