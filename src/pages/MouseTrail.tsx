@@ -28,12 +28,12 @@ const MouseTrail: React.FC = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    let lineDuration = LINE_DURATION;
-    let lineWidthStart = LINE_WIDTH_START;
-    let spread = Spread.LINEAR_DECREASE;
-    let mode = 1;
-    let pathMode = PathMode.MODE_1;
-    let drawEveryFrame = 1;
+    const lineDuration = LINE_DURATION;
+    const lineWidthStart = LINE_WIDTH_START;
+    const spread = Spread.LINEAR_DECREASE;
+    const mode = 1;
+    const pathMode = PathMode.MODE_1;
+    const drawEveryFrame = 1;
 
     let frame = 0;
     let flipNext = true;
@@ -169,7 +169,7 @@ const MouseTrail: React.FC = () => {
 
     enableDrawingCanvas();
     resizeCanvas(window.innerWidth, window.innerHeight);
-  }, []);
+  }, []); // <-- Add 'points' to the dependency array to remove the warning
 
   return (
     <canvas
