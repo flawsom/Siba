@@ -18,7 +18,7 @@ enum SpreadMode {
 
 const LINE_DURATION = 2;
 const LINE_WIDTH_START = 5;
-const DRAW_EVERY_FRAME = 1; // Add this constant to define the value of drawEveryFrame
+const DRAW_EVERY_FRAME = 1;
 
 const MouseTrail: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -39,7 +39,7 @@ const MouseTrail: React.FC = () => {
     const lineWidthStart = LINE_WIDTH_START;
     const spread = SpreadMode.LerpDecrease;
     const mode = Mode.MODE_1;
-    const pathMode: PathMode = PathMode.MODE_1; // Explicitly set the type and initial value
+    const pathMode: PathMode = PathMode.MODE_1;
 
     let clickCount = 0;
     let frame = 0;
@@ -65,6 +65,10 @@ const MouseTrail: React.FC = () => {
           lastPoint = points[i - 1];
         } else {
           lastPoint = points[i];
+        }
+
+        if (point === undefined) {
+          continue;
         }
 
         point.lifetime += 1;
