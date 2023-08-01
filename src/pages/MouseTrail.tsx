@@ -18,6 +18,7 @@ enum SpreadMode {
 
 const LINE_DURATION = 2;
 const LINE_WIDTH_START = 5;
+const DRAW_EVERY_FRAME = 1; // Add this constant to define the value of drawEveryFrame
 
 const MouseTrail: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,8 +39,7 @@ const MouseTrail: React.FC = () => {
     const lineWidthStart = LINE_WIDTH_START;
     const spread = SpreadMode.LerpDecrease;
     const mode = Mode.MODE_1;
-    const pathMode = PathMode.MODE_1;
-    const drawEveryFrame = 1; // Only adds a Point after these many 'mousemove' events
+    const pathMode: PathMode = PathMode.MODE_1; // Explicitly set the type and initial value
 
     let clickCount = 0;
     let frame = 0;
@@ -134,7 +134,7 @@ const MouseTrail: React.FC = () => {
     // Mouse Listeners
     function enableListeners() {
       document.addEventListener('mousemove', (e) => {
-        if (frame === drawEveryFrame) {
+        if (frame === DRAW_EVERY_FRAME) { // Use DRAW_EVERY_FRAME constant instead of drawEveryFrame
           const rect = canvas.getBoundingClientRect();
           const x = e.clientX - rect.left; // Adjust the x position based on the canvas position
           const y = e.clientY - rect.top; // Adjust the y position based on the canvas position
@@ -170,7 +170,7 @@ const MouseTrail: React.FC = () => {
 
     // Cleanup function
     return () => {
-      document.removeEventListener('mousemove', () => { });
+      document.removeEventListener('mousemove', () => {});
     };
   }, []);
 
