@@ -18,14 +18,13 @@ const MouseTrail: React.FC = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    let lineDuration = LINE_DURATION;
-    let lineWidthStart = LINE_WIDTH_START;
-    let spread = 2;
-    let mode = 1;
-    let pathMode = 1;
-    let drawEveryFrame = 1; // Only adds a Point after these many 'mousemove' events
+    const lineDuration = LINE_DURATION;
+    const lineWidthStart = LINE_WIDTH_START;
+    const spread = 2;
+    const mode = 1;
+    const pathMode = 1;
+    const drawEveryFrame = 1; // Only adds a Point after these many 'mousemove' events
 
-    let clickCount = 0;
     let frame = 0;
     let flipNext = true;
 
@@ -58,10 +57,10 @@ const MouseTrail: React.FC = () => {
         }
 
         // Begin drawing stuff!
-        const inc: number = point.lifetime / duration; // 0 to 1 over lineDuration
-        const dec: number = 1 - inc;
+        const inc = point.lifetime / duration; // 0 to 1 over lineDuration
+        const dec = 1 - inc;
 
-        let spreadRate: number = 0; // Initialize with a default value
+        let spreadRate = 0;
 
         if (spread === 1) {
           spreadRate = lineWidthStart / (point.lifetime * 2);
@@ -69,8 +68,6 @@ const MouseTrail: React.FC = () => {
         if (spread === 2) {
           spreadRate = lineWidthStart * (1 - inc);
         } // Linear Decrease
-
-        const fadeRate = dec;
 
         ctx.lineJoin = "round";
         ctx.lineWidth = spreadRate;
@@ -140,7 +137,7 @@ const MouseTrail: React.FC = () => {
         window.mozRequestAnimationFrame ||
         window.oRequestAnimationFrame ||
         window.msRequestAnimationFrame ||
-        function (callback) {
+        function () {
           window.setTimeout(callback, 1000 / 60);
         }
       );
@@ -152,10 +149,6 @@ const MouseTrail: React.FC = () => {
     function draw() {
       animatePoints();
       requestAnimationFrame(draw);
-    }
-
-    function init() {
-      draw();
     }
 
     function enableDrawingCanvas() {
@@ -173,7 +166,7 @@ const MouseTrail: React.FC = () => {
 
     enableDrawingCanvas();
     resizeCanvas(window.innerWidth, window.innerHeight);
-  }, []);
+  }, []); // Empty dependency array since 'points' doesn't need to trigger the effect
 
   return (
     <canvas
