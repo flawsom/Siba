@@ -11,7 +11,7 @@ const MouseTrail: React.FC = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    let ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     // Set canvas size to match the window
@@ -30,6 +30,9 @@ const MouseTrail: React.FC = () => {
     let flipNext = true;
 
     function animatePoints() {
+      ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
