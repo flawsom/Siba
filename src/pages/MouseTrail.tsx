@@ -61,7 +61,8 @@ const MouseTrail: React.FC = () => {
         const inc: number = point.lifetime / duration; // 0 to 1 over lineDuration
         const dec: number = 1 - inc;
 
-        let spreadRate: number; // Add explicit type annotation
+        let spreadRate: number = 0; // Initialize with a default value
+
         if (spread === 1) {
           spreadRate = lineWidthStart / (point.lifetime * 2);
         } // Lerp Decrease
