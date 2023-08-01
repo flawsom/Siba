@@ -1,13 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 
 enum PathMode {
-  MODE_1 = 'MODE_1',
-  MODE_2 = 'MODE_2',
-}
-
-enum Spread {
-  LERP_DECREASE = 1,
-  LINEAR_DECREASE = 2,
+  MODE_1,
+  MODE_2,
 }
 
 const LINE_DURATION = 2;
@@ -30,34 +25,32 @@ const MouseTrail: React.FC = () => {
 
     const lineDuration = LINE_DURATION;
     const lineWidthStart = LINE_WIDTH_START;
-    const spread = Spread.LINEAR_DECREASE;
+    const spread = 2;
     const mode = 1;
-    const pathMode = PathMode.MODE_1;
-    const drawEveryFrame = 1;
+    const pathMode: PathMode = PathMode.MODE_1;
+    const drawEveryFrame = 1; // Only adds a Point after these many 'mousemove' events
 
     let frame = 0;
     let flipNext = true;
 
     function animatePoints() {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
+      let point, lastPoint;
 
       if (pathMode === PathMode.MODE_2) {
         ctx.beginPath();
       }
 
       for (let i = 0; i < points.length; i++) {
-        const point = points[i];
-        if (!point) continue;
+        point = points[i];
 
-        const lastPoint = points[i - 1] || point;
+        if (points[i - 1] !== undefined) {
+          lastPoint = points[i - 1];
+        } else {
+          lastPoint = points[i];
+        }
 
         point.lifetime += 1;
 
@@ -67,17 +60,18 @@ const MouseTrail: React.FC = () => {
         }
 
         // Begin drawing stuff!
-        const inc = point.lifetime / duration;
+        const inc = point.lifetime / duration; // 0 to 1 over lineDuration
         const dec = 1 - inc;
 
         let spreadRate = 0;
-
-        if (spread === Spread.LERP_DECREASE) {
+        if (spread === 1) {
           spreadRate = lineWidthStart / (point.lifetime * 2);
         } // Lerp Decrease
-        if (spread === Spread.LINEAR_DECREASE) {
+        if (spread === 2) {
           spreadRate = lineWidthStart * (1 - inc);
         } // Linear Decrease
+
+        const fadeRate = dec;
 
         ctx.lineJoin = "round";
         ctx.lineWidth = spreadRate;
@@ -119,32 +113,39 @@ const MouseTrail: React.FC = () => {
     }
 
     function resizeCanvas(w: number, h: number) {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      ctx.canvas.width = w;
-      ctx.canvas.height = h;
+      if (ctx !== undefined) {
+        ctx.canvas.width = w;
+        ctx.canvas.height = h;
+      }
     }
 
     // Mouse Listeners
     function enableListeners() {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
       document.addEventListener('mousemove', (e) => {
         if (frame === drawEveryFrame) {
           const rect = canvas.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
+          const x = e.clientX - rect.left; // Adjust the x position based on the canvas position
+          const y = e.clientY - rect.top; // Adjust the y position based on the canvas position
           addPoint(x, y);
           frame = 0;
         }
         frame++;
       });
     }
+
+    // RequestAnimFrame definition
+    window.requestAnimFrame = (function (callback) {
+      return (
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback) {
+          window.setTimeout(callback, 1000 / 60);
+        }
+      );
+    })();
 
     enableListeners();
     draw();
@@ -155,7 +156,7 @@ const MouseTrail: React.FC = () => {
     }
 
     function enableDrawingCanvas() {
-      if (!canvasRef.current) {
+      if (canvas === undefined) {
         const newCanvas = document.createElement('canvas');
         newCanvas.setAttribute('id', 'myCanvas');
         newCanvas.style.position = 'fixed';
