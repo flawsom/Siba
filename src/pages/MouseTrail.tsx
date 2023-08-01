@@ -173,7 +173,7 @@ const MouseTrail: React.FC = () => {
 
     enableDrawingCanvas();
     resizeCanvas(window.innerWidth, window.innerHeight);
-  }, [points]); // Add 'points' to the dependency array
+  }, [points]);
 
   return (
     <canvas
