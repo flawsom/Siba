@@ -146,20 +146,6 @@ const MouseTrail: React.FC = () => {
       });
     }
 
-    // RequestAnimFrame definition
-    window.requestAnimFrame = (function (callback) {
-      return (
-        window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.oRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
-        function () {
-          window.setTimeout(callback, 1000 / 60);
-        }
-      );
-    })();
-
     enableListeners();
     draw();
 
@@ -169,7 +155,7 @@ const MouseTrail: React.FC = () => {
     }
 
     function enableDrawingCanvas() {
-      if (canvas === undefined) {
+      if (!canvasRef.current) {
         const newCanvas = document.createElement('canvas');
         newCanvas.setAttribute('id', 'myCanvas');
         newCanvas.style.position = 'fixed';
@@ -183,7 +169,7 @@ const MouseTrail: React.FC = () => {
 
     enableDrawingCanvas();
     resizeCanvas(window.innerWidth, window.innerHeight);
-  }, [points]);
+  }, []);
 
   return (
     <canvas
