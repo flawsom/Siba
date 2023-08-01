@@ -22,7 +22,7 @@ const MouseTrail: React.FC = () => {
     const lineWidthStart = LINE_WIDTH_START;
     const spread = 2;
     const mode = 1;
-    const pathMode = 1;
+    const pathMode: number = 1; // Explicitly specify the type as number
     const drawEveryFrame = 1;
 
     let frame = 0;
