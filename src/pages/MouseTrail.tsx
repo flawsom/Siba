@@ -43,11 +43,10 @@ const MouseTrail: React.FC = () => {
 
     let frame = 0;
     let flipNext = true;
-    let lastPoint: Point | undefined = undefined; // Initialize lastPoint as undefined
+    let lastPoint: Point | null = null;
 
     function animatePoints() {
-      // Add a check to ensure ctx and canvas are not null before using them
-      if (!ctx || !canvas) return;
+      if (!ctx) return;
 
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -61,12 +60,11 @@ const MouseTrail: React.FC = () => {
       for (let i = 0; i < points.length; i++) {
         point = points[i];
 
-        // Assign lastPoint with a default value if it is undefined
-        if (lastPoint === undefined) {
-          lastPoint = point || new Point(0, 0, 0, false); // Provide appropriate default values
+        if (!lastPoint) {
+          lastPoint = point;
         }
 
-        if (point === undefined) {
+        if (!point) {
           continue;
         }
 
@@ -78,7 +76,7 @@ const MouseTrail: React.FC = () => {
         }
 
         // Begin drawing stuff!
-        const inc = point.lifetime / duration; // 0 to 1 over lineDuration
+        const inc = point.lifetime / duration;
         const dec = 1 - inc;
 
         let spreadRate = 0;
@@ -90,7 +88,7 @@ const MouseTrail: React.FC = () => {
           spreadRate = lineWidthStart;
         }
 
-        ctx.lineJoin = "round";
+        ctx.lineJoin = 'round';
         ctx.lineWidth = spreadRate;
         ctx.strokeStyle = `rgb(${Math.floor(255)}, ${Math.floor(200 - 255 * dec)}, ${Math.floor(200 - 255 * inc)})`;
 
@@ -131,7 +129,7 @@ const MouseTrail: React.FC = () => {
     }
 
     function resizeCanvas(w: number, h: number) {
-      if (ctx !== null) {
+      if (ctx) {
         ctx.canvas.width = w;
         ctx.canvas.height = h;
       }
@@ -140,9 +138,6 @@ const MouseTrail: React.FC = () => {
     // Mouse Listeners
     function enableListeners() {
       document.addEventListener('mousemove', (e) => {
-        const canvas = canvasRef.current;
-        if (!canvas) return; // Return early if canvas is null
-
         if (frame === DRAW_EVERY_FRAME) {
           const rect = canvas.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -155,10 +150,9 @@ const MouseTrail: React.FC = () => {
     }
 
     // RequestAnimFrame definition
-    (window as any).requestAnimFrame = (function(callback: (timestamp: number) => void) {
+    window.requestAnimFrame = (function(callback: (timestamp: number) => void) {
       return (
         window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         window.oRequestAnimationFrame ||
         window.msRequestAnimationFrame ||
@@ -170,7 +164,7 @@ const MouseTrail: React.FC = () => {
 
     function animate() {
       animatePoints();
-      (window as any).requestAnimFrame(animate);
+      window.requestAnimFrame(animate);
     }
 
     enableListeners();
