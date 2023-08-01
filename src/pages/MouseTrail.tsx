@@ -60,7 +60,7 @@ const MouseTrail: React.FC = () => {
       for (let i = 0; i < points.length; i++) {
         point = points[i];
 
-        if (!lastPoint) {
+        if (!lastPoint && point) {
           setLastPoint(point);
         }
 
@@ -101,9 +101,9 @@ const MouseTrail: React.FC = () => {
         }
 
         if (mode === Mode.MODE_1) {
-          ctx.arc(midpoint.x, midpoint.y, distance / 2, angle, angle + Math.PI, point.flip);
+          ctx.arc(midpoint?.x ?? 0, midpoint?.y ?? 0, distance / 2, angle, angle + Math.PI, point.flip);
         } else if (mode === Mode.MODE_2) {
-          ctx.moveTo(lastPoint.x, lastPoint.y);
+          ctx.moveTo(lastPoint?.x ?? 0, lastPoint?.y ?? 0);
           ctx.lineTo(point.x, point.y);
         }
 
@@ -113,7 +113,9 @@ const MouseTrail: React.FC = () => {
         }
 
         // Update lastPoint for the next iteration
-        setLastPoint(point);
+        if (point) {
+          setLastPoint(point);
+        }
       }
 
       if (pathMode === PathMode.MODE_2) {
@@ -199,17 +201,26 @@ class Point {
     this.flip = flip;
   }
 
-  static midPoint(p1: Point, p2: Point) {
+  static midPoint(p1: Point | null, p2: Point | null) {
+    if (!p1 || !p2) {
+      return null;
+    }
     return new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, 0, false);
   }
 
-  static distance(p1: Point, p2: Point) {
+  static distance(p1: Point | null, p2: Point | null) {
+    if (!p1 || !p2) {
+      return 0;
+    }
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  static angle(p1: Point, p2: Point) {
+  static angle(p1: Point | null, p2: Point | null) {
+    if (!p1 || !p2) {
+      return 0;
+    }
     return Math.atan2(p2.y - p1.y, p2.x - p1.x);
   }
 }
