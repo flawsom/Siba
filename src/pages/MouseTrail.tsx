@@ -47,8 +47,8 @@ const MouseTrail: React.FC = () => {
     let lastPoint: Point | undefined = undefined; // Initialize lastPoint as undefined
 
     function animatePoints() {
-      // Add a check to ensure ctx and lastPoint are not null/undefined before using them
-      if (!ctx || lastPoint === undefined) return;
+      // Add a check to ensure ctx is not null before using it
+      if (!ctx) return;
 
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -61,6 +61,11 @@ const MouseTrail: React.FC = () => {
 
       for (let i = 0; i < points.length; i++) {
         point = points[i];
+
+        // Assign lastPoint with a default value if it is undefined
+        if (lastPoint === undefined) {
+          lastPoint = point;
+        }
 
         if (point === undefined) {
           continue;
@@ -90,27 +95,24 @@ const MouseTrail: React.FC = () => {
         ctx.lineWidth = spreadRate;
         ctx.strokeStyle = `rgb(${Math.floor(255)}, ${Math.floor(200 - 255 * dec)}, ${Math.floor(200 - 255 * inc)})`;
 
-        // Add a check here to ensure lastPoint is not undefined before using it
-        if (lastPoint !== undefined) {
-          const distance = Point.distance(lastPoint, point);
-          const midpoint = Point.midPoint(lastPoint, point);
-          const angle = Point.angle(lastPoint, point);
+        const distance = Point.distance(lastPoint, point);
+        const midpoint = Point.midPoint(lastPoint, point);
+        const angle = Point.angle(lastPoint, point);
 
-          if (pathMode === PathMode.MODE_1) {
-            ctx.beginPath();
-          }
+        if (pathMode === PathMode.MODE_1) {
+          ctx.beginPath();
+        }
 
-          if (mode === Mode.MODE_1) {
-            ctx.arc(midpoint.x, midpoint.y, distance / 2, angle, angle + Math.PI, point.flip);
-          } else if (mode === Mode.MODE_2) {
-            ctx.moveTo(lastPoint.x, lastPoint.y);
-            ctx.lineTo(point.x, point.y);
-          }
+        if (mode === Mode.MODE_1) {
+          ctx.arc(midpoint.x, midpoint.y, distance / 2, angle, angle + Math.PI, point.flip);
+        } else if (mode === Mode.MODE_2) {
+          ctx.moveTo(lastPoint.x, lastPoint.y);
+          ctx.lineTo(point.x, point.y);
+        }
 
-          if (pathMode === PathMode.MODE_1) {
-            ctx.stroke();
-            ctx.closePath();
-          }
+        if (pathMode === PathMode.MODE_1) {
+          ctx.stroke();
+          ctx.closePath();
         }
 
         // Update lastPoint for the next iteration
@@ -130,10 +132,9 @@ const MouseTrail: React.FC = () => {
     }
 
     function resizeCanvas(w: number, h: number) {
-      // Add a check to ensure ctx and canvas are not null/undefined before accessing canvas property
-      if (ctx && canvas) {
-        canvas.width = w;
-        canvas.height = h;
+      if (ctx !== null) {
+        ctx.canvas.width = w;
+        ctx.canvas.height = h;
       }
     }
 
@@ -141,9 +142,6 @@ const MouseTrail: React.FC = () => {
     function enableListeners() {
       document.addEventListener('mousemove', (e) => {
         if (frame === DRAW_EVERY_FRAME) {
-          const canvas = canvasRef.current; // Get the canvas element from the ref
-          if (!canvas) return; // Add a check to ensure canvas is not null/undefined
-
           const rect = canvas.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
@@ -155,22 +153,22 @@ const MouseTrail: React.FC = () => {
     }
 
     // RequestAnimFrame definition
-    (window as any).requestAnimFrame = (function (callback: any) {
+    (window as any).requestAnimFrame = (function(callback: any) {
       return (
         window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         window.oRequestAnimationFrame ||
         window.msRequestAnimationFrame ||
-        function (callback: any) {
+        function(callback: any) {
           window.setTimeout(callback, 1000 / 60);
         }
       );
-    })();
+    })(animatePoints);
 
     function animate() {
       animatePoints();
-      requestAnimFrame(animate);
+      (window as any).requestAnimFrame(animate);
     }
 
     enableListeners();
@@ -179,7 +177,7 @@ const MouseTrail: React.FC = () => {
 
     // Cleanup function
     return () => {
-      document.removeEventListener('mousemove', () => { });
+      document.removeEventListener('mousemove', () => {});
     };
   }, []);
 
