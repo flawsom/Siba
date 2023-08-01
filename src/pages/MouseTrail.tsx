@@ -1,43 +1,27 @@
 import React, { useRef, useEffect } from 'react';
 
-enum SpreadMode {
-  LERP_INCREASE = 1,
-  LERP_DECREASE = 2,
-}
-
 enum PathMode {
-  MODE_1 = 1,
-  MODE_2 = 2,
+  MODE_1 = 'MODE_1',
+  MODE_2 = 'MODE_2',
 }
 
-class Point {
-  x: number;
-  y: number;
-  lifetime: number;
-
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-    this.lifetime = 0;
-  }
-
-  static distance(a: Point, b: Point) {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
+enum Mode {
+  MODE_1,
+  MODE_2,
 }
 
-const lineDuration = 2; // seconds
-const lineWidthStart = 5;
-const spread = SpreadMode.LERP_INCREASE;
-const mode = PathMode.MODE_1;
-const pathMode = PathMode.MODE_2;
-const drawEveryFrame = 2;
+enum SpreadMode {
+  LerpIncrease,
+  LerpDecrease,
+  LinearDecrease,
+}
+
+const LINE_DURATION = 2;
+const LINE_WIDTH_START = 5;
 
 const MouseTrail: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const pointsRef = useRef<Point[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const points: { x: number; y: number; lifetime: number; flip: boolean }[] = [];
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -46,20 +30,40 @@ const MouseTrail: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let clickCount = 0;
-    const points: Point[] = [];
+    // Set canvas size to match the window
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    function addPoint(x: number, y: number) {
-      points.push(new Point(x, y));
-    }
+    const lineDuration = LINE_DURATION;
+    const lineWidthStart = LINE_WIDTH_START;
+    const spread = SpreadMode.LerpDecrease;
+    const mode = Mode.MODE_1;
+    const pathMode = PathMode.MODE_1;
+    const drawEveryFrame = 1; // Only adds a Point after these many 'mousemove' events
+
+    let clickCount = 0;
+    let frame = 0;
+    let flipNext = true;
 
     function animatePoints() {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
       const duration = lineDuration * 1000 / 60;
+      let point, lastPoint;
+
+      if (pathMode === PathMode.MODE_2) {
+        ctx.beginPath();
+      }
 
       for (let i = 0; i < points.length; i++) {
-        const point = points[i];
+        point = points[i];
+
+        if (points[i - 1] !== undefined) {
+          lastPoint = points[i - 1];
+        } else {
+          lastPoint = points[i];
+        }
+
         point.lifetime += 1;
 
         if (point.lifetime > duration) {
@@ -67,58 +71,101 @@ const MouseTrail: React.FC = () => {
           continue;
         }
 
-        const spreadRate = spread === SpreadMode.LERP_INCREASE
-          ? lineWidthStart / (point.lifetime * 2)
-          : lineWidthStart - (lineWidthStart / (point.lifetime * 2));
+        // Begin drawing stuff!
+        const inc = point.lifetime / duration; // 0 to 1 over lineDuration
+        const dec = 1 - inc;
 
-        let lastPoint;
-        if (i === 0 || point.lifetime === 0) {
-          lastPoint = point;
-        } else {
-          lastPoint = points[i - 1];
+        let spreadRate = 0;
+        if (spread === SpreadMode.LerpIncrease) {
+          spreadRate = lineWidthStart / (point.lifetime * 2);
+        } else if (spread === SpreadMode.LerpDecrease) {
+          spreadRate = lineWidthStart * (1 - inc);
+        } else if (spread === SpreadMode.LinearDecrease) {
+          spreadRate = lineWidthStart;
         }
 
-        ctx.beginPath();
         ctx.lineJoin = "round";
         ctx.lineWidth = spreadRate;
-        ctx.strokeStyle = `rgb(${Math.floor(255)}, ${Math.floor(200 - 255 * 0.5)}, ${Math.floor(200 - 255 * 0.5)})`;
+        ctx.strokeStyle = `rgb(${Math.floor(255)}, ${Math.floor(200 - 255 * dec)}, ${Math.floor(200 - 255 * inc)})`;
 
-        if (mode === PathMode.MODE_1) {
+        const distance = Point.distance(lastPoint, point);
+        const midpoint = Point.midPoint(lastPoint, point);
+        const angle = Point.angle(lastPoint, point);
+
+        if (pathMode === PathMode.MODE_1) {
+          ctx.beginPath();
+        }
+
+        if (mode === Mode.MODE_1) {
+          ctx.arc(midpoint.x, midpoint.y, distance / 2, angle, angle + Math.PI, point.flip);
+        } else if (mode === Mode.MODE_2) {
           ctx.moveTo(lastPoint.x, lastPoint.y);
           ctx.lineTo(point.x, point.y);
         }
 
-        if (mode === PathMode.MODE_2) {
-          const distance = Point.distance(lastPoint, point);
-          const spc = 5;
-          let lastPoint2 = new Point(lastPoint.x, lastPoint.y);
-
-          while (Point.distance(lastPoint2, point) >= spc) {
-            lastPoint2 = new Point(
-              lastPoint2.x + ((point.x - lastPoint2.x) / distance) * spc,
-              lastPoint2.y + ((point.y - lastPoint2.y) / distance) * spc
-            );
-            ctx.lineTo(lastPoint2.x, lastPoint2.y);
-          }
+        if (pathMode === PathMode.MODE_1) {
+          ctx.stroke();
+          ctx.closePath();
         }
-
-        ctx.stroke();
       }
 
-      requestAnimationFrame(animatePoints);
+      if (pathMode === PathMode.MODE_2) {
+        ctx.stroke();
+        ctx.closePath();
+      }
     }
 
-    document.addEventListener('mousemove', (e) => {
-      if (points.length % drawEveryFrame === 0) {
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        addPoint(x, y);
+    function addPoint(x: number, y: number) {
+      flipNext = !flipNext;
+      const point = new Point(x, y, 0, flipNext);
+      points.push(point);
+    }
+
+    function resizeCanvas(w: number, h: number) {
+      if (ctx !== undefined) {
+        ctx.canvas.width = w;
+        ctx.canvas.height = h;
       }
-    });
+    }
 
-    animatePoints();
+    // Mouse Listeners
+    function enableListeners() {
+      document.addEventListener('mousemove', (e) => {
+        if (frame === drawEveryFrame) {
+          const rect = canvas.getBoundingClientRect();
+          const x = e.clientX - rect.left; // Adjust the x position based on the canvas position
+          const y = e.clientY - rect.top; // Adjust the y position based on the canvas position
+          addPoint(x, y);
+          frame = 0;
+        }
+        frame++;
+      });
+    }
 
+    // RequestAnimFrame definition
+    (window as any).requestAnimFrame = (function (callback: any) {
+      return (
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback: any) {
+          window.setTimeout(callback, 1000 / 60);
+        }
+      );
+    })();
+
+    function animate() {
+      animatePoints();
+      requestAnimFrame(animate);
+    }
+
+    enableListeners();
+    animate();
+    resizeCanvas(window.innerWidth, window.innerHeight);
+
+    // Cleanup function
     return () => {
       document.removeEventListener('mousemove', () => {});
     };
@@ -132,5 +179,33 @@ const MouseTrail: React.FC = () => {
     />
   );
 };
+
+class Point {
+  x: number;
+  y: number;
+  lifetime: number;
+  flip: boolean;
+
+  constructor(x: number, y: number, lifetime: number, flip: boolean) {
+    this.x = x;
+    this.y = y;
+    this.lifetime = lifetime;
+    this.flip = flip;
+  }
+
+  static midPoint(p1: Point, p2: Point) {
+    return new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, 0, false);
+  }
+
+  static distance(p1: Point, p2: Point) {
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  static angle(p1: Point, p2: Point) {
+    return Math.atan2(p2.y - p1.y, p2.x - p1.x);
+  }
+}
 
 export default MouseTrail;
