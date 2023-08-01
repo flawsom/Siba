@@ -63,7 +63,7 @@ const MouseTrail: React.FC = () => {
 
         // Assign lastPoint with a default value if it is undefined
         if (lastPoint === undefined) {
-          lastPoint = point;
+          lastPoint = point || new Point(0, 0, 0, false); // Provide appropriate default values
         }
 
         if (point === undefined) {
