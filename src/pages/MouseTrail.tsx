@@ -60,7 +60,12 @@ const MouseTrail: React.FC = () => {
       for (let i = 0; i < points.length; i++) {
         point = points[i];
 
-        let lastPoint = points[i - 1] || point; // Provide a default value for lastPoint
+        let lastPoint = points[i - 1]; // Remove the default assignment
+
+        if (i === 0) {
+          // Special handling for the first point
+          lastPoint = point;
+        }
 
         if (point === undefined) {
           continue;
